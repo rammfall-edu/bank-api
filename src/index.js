@@ -13,19 +13,19 @@ fastify.register(import('@fastify/cookie'));
 const db = {
   account: 100,
   transactions: {
-    1: {
+    0: {
       type: 'Sending',
       amount: 20,
       date: '2022-01-01T00:00:00',
       description: 'Top up balance my internet provider',
-      id: 1,
+      id: 0,
     },
-    2: {
+    1: {
       type: 'Receiving',
       amount: 40,
       date: '2022-02-01T00:00:00',
       description: 'Money from my boss',
-      id: 2,
+      id: 1,
     },
   },
   getLength() {
