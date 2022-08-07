@@ -1,12 +1,12 @@
 import Fastify from 'fastify';
 
 const fastify = Fastify({
-  logger: true,
+  logger: true
 });
 
 fastify.register(import('@fastify/cors'));
 fastify.register(import('@fastify/multipart'), {
-  addToBody: true,
+  addToBody: true
 });
 fastify.register(import('@fastify/cookie'));
 
@@ -18,19 +18,19 @@ const db = {
       amount: 20,
       date: '2022-01-01T00:00:00',
       description: 'Top up balance my internet provider',
-      id: 0,
+      id: 0
     },
     1: {
       type: 'Receiving',
       amount: 40,
       date: '2022-02-01T00:00:00',
       description: 'Money from my boss',
-      id: 1,
-    },
+      id: 1
+    }
   },
   getLength() {
     return Object.keys(this.transactions).length;
-  },
+  }
 };
 
 fastify.register(
@@ -48,10 +48,22 @@ fastify.register(
         description,
         amount,
         date: new Date().toLocaleString(),
-        id: db.getLength(),
+        id: db.getLength()
       };
 
-      db.transactions[db.getLength()] = transaction;
+      if (type === 'Sending' && Number(amount) > db.account) {
+        return reply.status(400).send({ info: 'You have not enough money' });
+      }
+
+      if (type === 'Sending') {
+        db.account -= Number(amount);
+      }
+      if (type === 'Receiving') {
+        db.account += Number(amount);
+      }
+
+
+        db.transactions[db.getLength()] = transaction;
 
       reply.send(transaction);
     });
@@ -59,7 +71,7 @@ fastify.register(
     done();
   },
   {
-    prefix: '/api',
+    prefix: '/api'
   }
 );
 
