@@ -9,6 +9,42 @@ fastify.register(import('@fastify/multipart'), {
   addToBody: true
 });
 fastify.register(import('@fastify/cookie'));
+fastify.register(import('@fastify/swagger'), {
+  routePrefix: '/documentation',
+  swagger: {
+    info: {
+      title: 'Bank API doc',
+      description: 'Testing the Fastify swagger API',
+      version: '0.1.0'
+    },
+    externalDocs: {
+      url: 'https://swagger.io',
+      description: 'Find more info here'
+    },
+    host: 'localhost',
+    schemes: ['http'],
+    consumes: ['application/json'],
+    produces: ['application/json'],
+    securityDefinitions: {
+      apiKey: {
+        type: 'apiKey',
+        name: 'apiKey',
+        in: 'header'
+      }
+    }
+  },
+  uiConfig: {
+    docExpansion: 'full',
+    deepLinking: false
+  },
+  uiHooks: {
+    onRequest: function (request, reply, next) { next() },
+    preHandler: function (request, reply, next) { next() }
+  },
+  staticCSP: true,
+  transformStaticCSP: (header) => header,
+  exposeRoute: true
+})
 
 const db = {
   account: 100,
@@ -41,7 +77,27 @@ fastify.register(
     instance.get('/account', async (request, reply) => {
       reply.send({ account: db.account });
     });
-    instance.post('/transactions', async (request, reply) => {
+    instance.post('/transactions',{
+      schema: {
+        body: {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['Sending', 'Receiving']
+            },
+            description: {
+              type: 'string'
+            },
+            amount: {
+              type: 'number',
+              minimum: 1,
+            }
+          },
+          required: ['type', 'description', 'amount'],
+        }
+      }
+    }, async (request, reply) => {
       const { type, description, amount } = request.body;
       const transaction = {
         type,
