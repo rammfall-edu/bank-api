@@ -38,13 +38,17 @@ fastify.register(import('@fastify/swagger'), {
     deepLinking: false
   },
   uiHooks: {
-    onRequest: function (request, reply, next) { next() },
-    preHandler: function (request, reply, next) { next() }
+    onRequest: function(request, reply, next) {
+      next();
+    },
+    preHandler: function(request, reply, next) {
+      next();
+    }
   },
   staticCSP: true,
   transformStaticCSP: (header) => header,
   exposeRoute: true
-})
+});
 
 const db = {
   account: 100,
@@ -77,7 +81,16 @@ fastify.register(
     instance.get('/account', async (request, reply) => {
       reply.send({ account: db.account });
     });
-    instance.post('/transactions',{
+    instance.get('/transaction/:id', (request, reply) => {
+      const { id } = request.params;
+      const transaction = db.transactions[id];
+      if (transaction) {
+        return reply.send(transaction);
+      }
+
+      reply.status(404).send({ info: 'Not found' });
+    });
+    instance.post('/transactions', {
       schema: {
         body: {
           type: 'object',
@@ -91,10 +104,10 @@ fastify.register(
             },
             amount: {
               type: 'number',
-              minimum: 1,
+              minimum: 1
             }
           },
-          required: ['type', 'description', 'amount'],
+          required: ['type', 'description', 'amount']
         }
       }
     }, async (request, reply) => {
@@ -119,7 +132,7 @@ fastify.register(
       }
 
 
-        db.transactions[db.getLength()] = transaction;
+      db.transactions[db.getLength()] = transaction;
 
       reply.send(transaction);
     });
